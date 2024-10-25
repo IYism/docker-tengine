@@ -293,7 +293,7 @@ ENV LUA_PATH="${LUA_LIB}/?.lua;${LUA_LIB}/?/init.lua;${HOME_DIR}/luajit/share/lu
 ENV LUA_CPATH="${LUA_MOD}/?.so;./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so"
 
 # Add custom compiled binaries to the PATH
-ENV PATH=$HOME_DIR/geoip/bin:$HOME_DIR/luajit/bin:$HOME_DIR/openssl33/bin:$HOME_DIR/pcre2/bin:$PATH
+ENV PATH=$HOME_DIR/geoip/bin:$HOME_DIR/luajit/bin:$HOME_DIR/Tongsuo/bin:$HOME_DIR/pcre2/bin:$PATH
 
 # Set the working directory to the Tengine home directory
 WORKDIR ${HOME_DIR}
