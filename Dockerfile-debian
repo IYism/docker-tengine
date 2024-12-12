@@ -11,7 +11,7 @@ ARG BUILD_DIR=/tmp/.build.tengine
 
 
 # Build Stage
-FROM debian:latest AS builder
+FROM debian:12 AS builder
 LABEL maintainer="iYism <admin@iyism.com>"
 
 # Component versions
@@ -250,7 +250,7 @@ RUN set -x \
 
 
 # Runtime Stage
-FROM debian:latest
+FROM debian:12-slim
 
 # Set environment variables for the runtime stage
 ARG USER \
