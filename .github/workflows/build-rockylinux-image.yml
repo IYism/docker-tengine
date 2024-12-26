@@ -35,21 +35,6 @@ jobs:
           docker buildx build \
             --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x \
             --push \
-            -f Dockerfile-alpine \
-            -t sungyism/tengine:latest \
-            -t sungyism/tengine:${{ vars.BUILD_VERSION }}-alpine \
-            . \
-            && \
-          docker buildx build \
-            --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x \
-            --push \
-            -f Dockerfile-debian \
-            -t sungyism/tengine:${{ vars.BUILD_VERSION }}-debian \
-            . \
-            && \
-          docker buildx build \
-            --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x \
-            --push \
             -f Dockerfile-rockylinux \
             -t sungyism/tengine:${{ vars.BUILD_VERSION }}-rockylinux \
             .
