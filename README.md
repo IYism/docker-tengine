@@ -1,25 +1,22 @@
 # Tengine Docker Image
-
 This repository provides multi-operating system Docker images for Tengine, designed for high-performance web applications. It supports Lua scripting, PCRE2, GMSSL, and more (via Tongsuo).
 
 ## Features
-
 - **GMSSL Support**: Provides cryptographic functions compliant with national standards.
-- **Lua Scripting**: Use LuaJIT with the lua-nginx-module for dynamic request handling and flexible configuration.
+- **Lua Support**: Use LuaJIT with the lua-nginx-module for dynamic request handling and flexible configuration.
 - **PCRE2 Support**: Enhanced regular expressions with JIT compilation for improved performance.
+- **GeoIP2 Support**: Enable IP-based geolocation using MaxMind's GeoIP2 databases.
 - **Brotli Compression**: Efficient compression for faster loading of static resources.
 
 ## Quick Start
 
 ### Build the Docker Image
-
 Build the Docker image locally:
 ```sh
 docker build -t sungyism/tengine:latest .
 ```
 
 ### Run the Container
-
 You can run the Tengine container using the following command:
 ```sh
 docker run -d -p 80:80 -p 443:443 --name tengine sungyism/tengine:latest
@@ -27,8 +24,7 @@ docker run -d -p 80:80 -p 443:443 --name tengine sungyism/tengine:latest
 
 This will start Tengine with the default configuration.
 
-### Custom NGINX Configuration
-
+### Custom Configuration
 You can customize the NGINX configuration by mounting your own configuration files into the container:
 ```sh
 docker run -d \
@@ -95,7 +91,6 @@ The following parameters were used to compile Tengine:
 --add-module=modules/ngx_http_upstream_consistent_hash_module
 --add-module=modules/ngx_http_upstream_dynamic_module
 --add-module=modules/ngx_http_upstream_dyups_module
---add-module=modules/ngx_http_upstream_iwrr_module
 --add-module=modules/ngx_http_upstream_keepalive_module
 --add-module=modules/ngx_http_upstream_session_sticky_module
 --add-module=modules/ngx_http_upstream_vnswrr_module
@@ -106,5 +101,4 @@ The following parameters were used to compile Tengine:
 
 
 ## Contributing
-
 Contributions are welcome! Please feel free to submit issues, pull requests, or suggestions.

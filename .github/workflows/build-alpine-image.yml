@@ -36,6 +36,7 @@ jobs:
             --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x \
             --push \
             -f Dockerfile-alpine \
+            --build-arg TENGINE_VERSION=${{ vars.BUILD_VERSION }} \
             -t sungyism/tengine:latest \
             -t sungyism/tengine:${{ vars.BUILD_VERSION }}-alpine \
             .

@@ -9,14 +9,15 @@ ARG LUA_LIB=${HOME_DIR}/lualib
 ARG LUA_MOD=${HOME_DIR}/luamod
 ARG BUILD_DIR=/tmp/.build.tengine
 
+# Tengine version supports build-arg parameter.
+ARG TENGINE_VERSION=master
 
 # Build Stage
 FROM debian:12 AS builder
 LABEL maintainer="iYism <admin@iyism.com>"
 
 # Component versions
-ENV TENGINE_VERSION=master \
-    ZLIB_VERSION=1.3.1 \
+ENV ZLIB_VERSION=1.3.1 \
     PCRE2_VERSION=10.44 \
     TONGSUO_VERSION=8.4.0 \
     GEOIP_VERSION=1.6.12 \
@@ -41,7 +42,8 @@ ARG USER \
     LOGS_DIR \
     LUA_LIB \
     LUA_MOD \
-    BUILD_DIR
+    BUILD_DIR \
+    TENGINE_VERSION
 
 # Switching to root to install the required packages
 USER root
@@ -135,7 +137,11 @@ RUN set -x \
     && tar zxf brotli-${BROTLI_VERSION}.tar.gz -C ngx_brotli-${NGX_BROTLI_VERSION}/deps \
     && mv ngx_brotli-${NGX_BROTLI_VERSION}/deps/brotli-${BROTLI_VERSION} ngx_brotli-${NGX_BROTLI_VERSION}/deps/brotli \
 # Install Tengine
-    && curl -LJO --output-dir ${BUILD_DIR} https://github.com/alibaba/tengine/archive/refs/heads/${TENGINE_VERSION}.tar.gz \
+    && if [ "${TENGINE_VERSION}" = "master" ]; then \
+           curl -LJO --output-dir ${BUILD_DIR} https://github.com/alibaba/tengine/archive/refs/heads/${TENGINE_VERSION}.tar.gz; \
+    else \
+           curl -LJO --output-dir ${BUILD_DIR} https://github.com/alibaba/tengine/archive/refs/tags/${TENGINE_VERSION}.tar.gz; \
+    fi \
     && tar zxf tengine-${TENGINE_VERSION}.tar.gz \
     && cd tengine-${TENGINE_VERSION} \
     && export LUAJIT_LIB=${HOME_DIR}/luajit/lib \
@@ -205,7 +211,6 @@ RUN set -x \
         --add-module=modules/ngx_http_upstream_consistent_hash_module \
         --add-module=modules/ngx_http_upstream_dynamic_module \
         --add-module=modules/ngx_http_upstream_dyups_module \
-        --add-module=modules/ngx_http_upstream_iwrr_module \
         --add-module=modules/ngx_http_upstream_keepalive_module \
         --add-module=modules/ngx_http_upstream_session_sticky_module \
         --add-module=modules/ngx_http_upstream_vnswrr_module \

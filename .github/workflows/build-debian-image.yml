@@ -36,5 +36,6 @@ jobs:
             --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x \
             --push \
             -f Dockerfile-debian \
+            --build-arg TENGINE_VERSION=${{ vars.BUILD_VERSION }} \
             -t sungyism/tengine:${{ vars.BUILD_VERSION }}-debian \
             .

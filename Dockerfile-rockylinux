@@ -9,29 +9,30 @@ ARG LUA_LIB=${HOME_DIR}/lualib
 ARG LUA_MOD=${HOME_DIR}/luamod
 ARG BUILD_DIR=/tmp/.build.tengine
 
+# Tengine version supports build-arg parameter.
+ARG TENGINE_VERSION=master
 
 # Build Stage
 FROM rockylinux:9 AS builder
 LABEL maintainer="iYism <admin@iyism.com>"
 
 # Component versions
-ENV TENGINE_VERSION            master
-ENV ZLIB_VERSION               1.3.1
-ENV PCRE2_VERSION              10.44
-ENV TONGSUO_VERSION            8.4.0
-ENV GEOIP_VERSION              1.6.12
-ENV BROTLI_VERSION             1.0.9
-ENV NGX_BROTLI_VERSION         master
-ENV NGX_GEOIP2_VERSION         3.4
-ENV NGX_DEVEL_KIT_VERSION      0.3.3
-ENV LUAJIT_VERSION             2.1-20240815
-ENV ECHO_NGINX_VERSION         0.63
-ENV LUA_NGINX_VERSION          0.10.27
-ENV STREAM_LUA_NGINX_VERSION   0.0.15
-ENV LUA_CJSON_VERSION          2.1.0.14
-ENV RESTY_CORE_VERSION         0.1.29
-ENV RESTY_LOCK_VERSION         0.09
-ENV RESTY_LRUCACHE_VERSION     0.14
+ENV ZLIB_VERSION=1.3.1 \
+    PCRE2_VERSION=10.44 \
+    TONGSUO_VERSION=8.4.0 \
+    GEOIP_VERSION=1.6.12 \
+    BROTLI_VERSION=1.0.9 \
+    NGX_BROTLI_VERSION=master \
+    NGX_GEOIP2_VERSION=3.4 \
+    NGX_DEVEL_KIT_VERSION=0.3.3 \
+    LUAJIT_VERSION=2.1-20240815 \
+    ECHO_NGINX_VERSION=0.63 \
+    LUA_NGINX_VERSION=0.10.27 \
+    STREAM_LUA_NGINX_VERSION=0.0.15 \
+    LUA_CJSON_VERSION=2.1.0.14 \
+    RESTY_CORE_VERSION=0.1.29 \
+    RESTY_LOCK_VERSION=0.09 \
+    RESTY_LRUCACHE_VERSION=0.14
 
 # Set environment variables for the build stage
 ARG USER \
@@ -41,7 +42,8 @@ ARG USER \
     LOGS_DIR \
     LUA_LIB \
     LUA_MOD \
-    BUILD_DIR
+    BUILD_DIR \
+    TENGINE_VERSION
 
 # Switching to root to install the required packages
 USER root
@@ -133,7 +135,11 @@ RUN set -x \
     && tar zxf brotli-${BROTLI_VERSION}.tar.gz -C ngx_brotli-${NGX_BROTLI_VERSION}/deps \
     && mv ngx_brotli-${NGX_BROTLI_VERSION}/deps/brotli-${BROTLI_VERSION} ngx_brotli-${NGX_BROTLI_VERSION}/deps/brotli \
 # Install Tengine
-    && curl -LJO --output-dir ${BUILD_DIR} https://github.com/alibaba/tengine/archive/refs/heads/${TENGINE_VERSION}.tar.gz \
+    && if [ "${TENGINE_VERSION}" = "master" ]; then \
+           curl -LJO --output-dir ${BUILD_DIR} https://github.com/alibaba/tengine/archive/refs/heads/${TENGINE_VERSION}.tar.gz; \
+    else \
+           curl -LJO --output-dir ${BUILD_DIR} https://github.com/alibaba/tengine/archive/refs/tags/${TENGINE_VERSION}.tar.gz; \
+    fi \
     && tar zxf tengine-${TENGINE_VERSION}.tar.gz \
     && cd tengine-${TENGINE_VERSION} \
     && export LUAJIT_LIB=${HOME_DIR}/luajit/lib \
@@ -204,7 +210,6 @@ RUN set -x \
         --add-module=modules/ngx_http_upstream_consistent_hash_module \
         --add-module=modules/ngx_http_upstream_dynamic_module \
         --add-module=modules/ngx_http_upstream_dyups_module \
-        --add-module=modules/ngx_http_upstream_iwrr_module \
         --add-module=modules/ngx_http_upstream_keepalive_module \
         --add-module=modules/ngx_http_upstream_session_sticky_module \
         --add-module=modules/ngx_http_upstream_vnswrr_module \
