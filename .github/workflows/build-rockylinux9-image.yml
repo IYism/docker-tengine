@@ -33,9 +33,9 @@ jobs:
       - name: Build and push multi-platform Docker image
         run: |
           docker buildx build \
-            --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x \
+            --platform linux/amd64,linux/arm64 \
             --push \
             -f Dockerfile-rockylinux \
             --build-arg TENGINE_VERSION=${{ vars.BUILD_VERSION }} \
-            -t sungyism/tengine:${{ vars.BUILD_VERSION }}-rockylinux \
+            -t sungyism/tengine:${{ vars.BUILD_VERSION }}-rockylinux-9 \
             .

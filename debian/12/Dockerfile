@@ -13,7 +13,7 @@ ARG BUILD_DIR=/tmp/.build.tengine
 ARG TENGINE_VERSION=master
 
 # Build Stage
-FROM rockylinux:9 AS builder
+FROM debian:12 AS builder
 LABEL maintainer="iYism <admin@iyism.com>"
 
 # Component versions
@@ -21,18 +21,19 @@ ENV ZLIB_VERSION=1.3.1 \
     PCRE2_VERSION=10.44 \
     TONGSUO_VERSION=8.4.0 \
     GEOIP_VERSION=1.6.12 \
-    BROTLI_VERSION=1.0.9 \
+    BROTLI_VERSION=1.1.0 \
     NGX_BROTLI_VERSION=master \
     NGX_GEOIP2_VERSION=3.4 \
     NGX_DEVEL_KIT_VERSION=0.3.3 \
-    LUAJIT_VERSION=2.1-20241113 \
+    LUAJIT_VERSION=2.1-20250117 \
     ECHO_NGINX_VERSION=0.63 \
-    LUA_NGINX_VERSION=0.10.27 \
-    STREAM_LUA_NGINX_VERSION=0.0.15 \
+    LUA_NGINX_VERSION=0.10.28 \
+    STREAM_LUA_NGINX_VERSION=0.0.16 \
     LUA_CJSON_VERSION=2.1.0.14 \
-    RESTY_CORE_VERSION=0.1.30 \
+    RESTY_CORE_VERSION=0.1.31 \
     RESTY_LOCK_VERSION=0.09 \
-    RESTY_LRUCACHE_VERSION=0.15
+    RESTY_LRUCACHE_VERSION=0.15 \
+    RESTY_STRING_VERSION=0.16
 
 # Set environment variables for the build stage
 ARG USER \
@@ -54,10 +55,12 @@ RUN set -x \
 # Mkdir basedir
     && mkdir -p ${LUA_LIB} ${LUA_MOD} \
 # Install development packages
-    && dnf install -y dnf-plugins-core \
-    && dnf config-manager --enable devel \
-    && dnf install -y make gcc gcc-c++ perl diffutils autoconf automake libtool procps-ng \
-        gd-devel brotli-devel libxslt-devel libxml2-devel libmaxminddb-devel \
+    && apt-get update \
+    && apt-get install -y gcc g++ make perl curl \
+        diffutils autoconf automake \
+        libtool findutils libgd-dev libbrotli-dev \
+        libxslt-dev libxml2-dev libmaxminddb-dev \
+    && apt-get clean \
 # Install zlib
     && curl -LO --output-dir ${BUILD_DIR} https://www.zlib.net/zlib-${ZLIB_VERSION}.tar.gz \
     && tar zxf zlib-${ZLIB_VERSION}.tar.gz \
@@ -198,7 +201,6 @@ RUN set -x \
         --add-module=modules/mod_config \
         --add-module=modules/mod_dubbo \
         --add-module=modules/mod_strategy \
-        --add-module=modules/ngx_backtrace_module \
         --add-module=modules/ngx_http_concat_module \
         --add-module=modules/ngx_http_footer_filter_module \
         --add-module=modules/ngx_http_proxy_connect_module \
@@ -230,35 +232,36 @@ RUN set -x \
 # Install lua-resty-core
     && curl -LJO --output-dir ${BUILD_DIR} https://github.com/openresty/lua-resty-core/archive/refs/tags/v${RESTY_CORE_VERSION}.tar.gz \
     && tar zxf lua-resty-core-${RESTY_CORE_VERSION}.tar.gz \
-    && cp -fr lua-resty-core-${RESTY_CORE_VERSION}/lib/* ${LUA_LIB} \
+    && cp -frp lua-resty-core-${RESTY_CORE_VERSION}/lib/* ${LUA_LIB} \
     && cd ${BUILD_DIR} \
 # Install lua-resty-lrucache
     && curl -LJO --output-dir ${BUILD_DIR} https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v${RESTY_LRUCACHE_VERSION}.tar.gz \
     && tar zxf lua-resty-lrucache-${RESTY_LRUCACHE_VERSION}.tar.gz \
-    && cp -fr lua-resty-lrucache-${RESTY_LRUCACHE_VERSION}/lib/* ${LUA_LIB} \
+    && cp -frp lua-resty-lrucache-${RESTY_LRUCACHE_VERSION}/lib/* ${LUA_LIB} \
     && cd ${BUILD_DIR} \
 # Install lua-resty-lock
     && curl -LJO --output-dir ${BUILD_DIR} https://github.com/openresty/lua-resty-lock/archive/refs/tags/v${RESTY_LOCK_VERSION}.tar.gz \
     && tar zxf lua-resty-lock-${RESTY_LOCK_VERSION}.tar.gz \
-    && cp -fr lua-resty-lock-${RESTY_LOCK_VERSION}/lib/* ${LUA_LIB} \
+    && cp -frp lua-resty-lock-${RESTY_LOCK_VERSION}/lib/* ${LUA_LIB} \
+    && cd ${BUILD_DIR} \
+# Install lua-resty-string
+    && curl -LJO --output-dir ${BUILD_DIR} https://github.com/openresty/lua-resty-string/archive/refs/tags/v${RESTY_STRING_VERSION}.tar.gz \
+    && tar zxf lua-resty-string-${RESTY_STRING_VERSION}.tar.gz \
+    && cp -frp lua-resty-string-${RESTY_STRING_VERSION}/lib/* ${LUA_LIB} \
     && cd ${BUILD_DIR} \
 # Install lua-cjson
     && curl -LJO --output-dir ${BUILD_DIR} https://github.com/openresty/lua-cjson/archive/refs/tags/${LUA_CJSON_VERSION}.tar.gz \
     && tar zxf lua-cjson-${LUA_CJSON_VERSION}.tar.gz \
     && cd lua-cjson-${LUA_CJSON_VERSION} \
     && make LUA_INCLUDE_DIR=${HOME_DIR}/luajit/include/luajit-2.1 \
-    && cp -a cjson.so ${LUA_MOD} \
+    && install cjson.so ${LUA_MOD} \
 # Clean tmpdata
     && cd ${HOME_DIR} \
-    && rm -fr ${BUILD_DIR} \
-    && dnf config-manager --disable devel \
-    && dnf remove -y make gcc gcc-c++ perl diffutils autoconf automake libtool dnf-plugins-core \
-    && dnf remove -y --noautoremove gd-devel brotli-devel libxslt-devel libxml2-devel libmaxminddb-devel \
-    && dnf clean all
+    && rm -fr ${BUILD_DIR}
 
 
 # Runtime Stage
-FROM rockylinux:9-minimal
+FROM debian:12-slim
 
 # Set environment variables for the runtime stage
 ARG USER \
@@ -287,15 +290,16 @@ COPY vhost.default.conf /etc/nginx/conf.d/default.conf
 COPY vhost.gmssl.conf /etc/nginx/conf.d/vhost.gmssl.conf
 
 RUN set -x \
+# Install required packages
+    && apt-get update \
+    && apt-get install -y findutils libgd3 libbrotli1 libxslt1.1 libxml2 libmaxminddb0 \
+    && apt-get clean \
 # Add nginx user
     && getent group $USER >/dev/null || groupadd -r $USER -g 101 \
     && getent passwd $USER >/dev/null || useradd -r -u 101 -g $USER -s /sbin/nologin \
         -d ${DATA_DIR} -m -c "$USER user" $USER \
 # Create the directories required for Tengine dependencies
-    && mkdir -p ${DATA_DIR} ${LOGS_DIR} \
-# Install required packages
-    && microdnf install -y findutils gd brotli libxslt libxml2 libmaxminddb \
-    && microdnf clean all
+    && mkdir -p ${DATA_DIR} ${LOGS_DIR}
 
 # Add Lua paths
 ENV LUA_PATH="${LUA_LIB}/?.lua;${LUA_LIB}/?/init.lua;${HOME_DIR}/luajit/share/luajit-2.1/?.lua;./?.lua;/usr/local/share/luajit-2.1/?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua"

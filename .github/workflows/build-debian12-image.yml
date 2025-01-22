@@ -1,4 +1,4 @@
-name: Build-alpine
+name: Build-debian
 
 on:
   push:
@@ -33,10 +33,9 @@ jobs:
       - name: Build and push multi-platform Docker image
         run: |
           docker buildx build \
-            --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x \
+            --platform linux/amd64,linux/arm64 \
             --push \
-            -f Dockerfile-alpine \
+            -f Dockerfile-debian \
             --build-arg TENGINE_VERSION=${{ vars.BUILD_VERSION }} \
-            -t sungyism/tengine:latest \
-            -t sungyism/tengine:${{ vars.BUILD_VERSION }}-alpine \
+            -t sungyism/tengine:${{ vars.BUILD_VERSION }}-debian-12 \
             .

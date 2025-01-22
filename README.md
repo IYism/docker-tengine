@@ -13,13 +13,13 @@ This repository provides multi-operating system Docker images for Tengine, desig
 ### Build the Docker Image
 Build the Docker image locally:
 ```sh
-docker build -t sungyism/tengine:latest .
+docker build -t tengine:latest .
 ```
 
 ### Run the Container
 You can run the Tengine container using the following command:
 ```sh
-docker run -d -p 80:80 -p 443:443 --name tengine sungyism/tengine:latest
+docker run -d -p 80:80 -p 443:443 --name tengine tengine:latest
 ```
 
 This will start Tengine with the default configuration.
@@ -33,7 +33,7 @@ docker run -d \
   -p 80:80/tcp \
   -p 443:443/tcp \
   --name tengine \
-  sungyism/tengine:latest
+  tengine:latest
 ```
 
 You can also include custom Lua scripts, or other configuration options as needed.
