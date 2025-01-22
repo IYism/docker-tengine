@@ -35,7 +35,6 @@ jobs:
           docker buildx build \
             --platform linux/amd64,linux/arm64 \
             --push \
-            -f Dockerfile-alpine \
             --build-arg TENGINE_VERSION=${{ vars.BUILD_VERSION }} \
             -t sungyism/tengine:latest \
             -t sungyism/tengine:${{ vars.BUILD_VERSION }}-alpine-3 \
