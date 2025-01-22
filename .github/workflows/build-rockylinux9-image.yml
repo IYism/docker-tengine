@@ -1,4 +1,4 @@
-name: Build-rockylinux
+name: Build-Rockylinux9-Image
 
 on:
   push:

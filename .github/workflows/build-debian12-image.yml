@@ -1,4 +1,4 @@
-name: Build-debian
+name: Build-Debian12-Image
 
 on:
   push:
