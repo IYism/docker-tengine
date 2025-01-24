@@ -33,7 +33,7 @@ jobs:
       - name: Build and push multi-platform Docker image
         run: |
           docker buildx build \
-            --platform linux/amd64,linux/arm64 \
+            --platform linux/amd64 \
             --push \
             -f ./fedora/41/Dockerfile \
             --build-arg TENGINE_VERSION=${{ vars.BUILD_VERSION }} \
