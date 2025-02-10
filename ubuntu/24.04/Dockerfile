@@ -18,7 +18,7 @@ LABEL maintainer="iYism <admin@iyism.com>"
 
 # Component versions
 ENV ZLIB_VERSION=1.3.1 \
-    PCRE2_VERSION=10.44 \
+    PCRE2_VERSION=10.45 \
     TONGSUO_VERSION=8.4.0 \
     GEOIP_VERSION=1.6.12 \
     BROTLI_VERSION=1.1.0 \
